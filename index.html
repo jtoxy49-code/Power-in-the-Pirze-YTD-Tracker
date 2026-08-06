@@ -289,6 +289,17 @@
   </section>
 
   <section class="block">
+    <div class="panel">
+      <div class="section-eyebrow">Week By Week</div>
+      <h2>Weekly Performance</h2>
+      <p class="desc">Net units per 7-day stretch since the season started &mdash; gold above the line, purple below.</p>
+      <div class="chart-wrap">
+        <svg class="chart" id="weeklyChart" viewBox="0 0 860 260"></svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
     <div class="two-col">
       <div class="panel">
         <div class="section-eyebrow">By The Month</div>
@@ -308,6 +319,12 @@
         </div>
       </div>
     </div>
+  </section>
+
+  <section class="block">
+    <div class="section-eyebrow" style="margin-bottom:16px;">The Crew</div>
+    <h2 style="margin-bottom:22px;">Cappers Recap</h2>
+    <div class="two-col" id="cappersGrid"></div>
   </section>
 
   <section class="block">
@@ -341,8 +358,7 @@
 
 <script>
 /* ============ RAW DATA — add new days here ============
-   Each entry: { d: "M/D", m: month number, v1: V1zons units, ghost: Ghost units (0 if not running that day) }
-   Combined daily total = v1 + ghost
+   Each entry: { d: "M/D", m: month number, v1: V1zons units, g: Ghost units (0 if not running that day) }
 */
 const RAW = [
   {d:"5/1",m:5,v1:7.25,g:0},{d:"5/2",m:5,v1:4.75,g:0},{d:"5/3",m:5,v1:0,g:0},{d:"5/4",m:5,v1:7,g:0},
@@ -352,27 +368,23 @@ const RAW = [
   {d:"5/17",m:5,v1:1.5,g:0},{d:"5/18",m:5,v1:5.75,g:0},{d:"5/19",m:5,v1:2.75,g:0},{d:"5/20",m:5,v1:2,g:0},
   {d:"5/21",m:5,v1:2,g:0},{d:"5/22",m:5,v1:3.75,g:0},{d:"5/23",m:5,v1:3.5,g:0},{d:"5/24",m:5,v1:4.5,g:0},
   {d:"5/25",m:5,v1:0,g:0},{d:"5/26",m:5,v1:9.25,g:0},{d:"5/27",m:5,v1:-1.5,g:0},{d:"5/28",m:5,v1:1.75,g:0},
-  {d:"5/29",m:5,v1:4.25,g:0},{d:"5/30",m:5,v1:3.75,g:0},{d:"5/31",m:5,v1:1,g:0},
-
-  {d:"6/1",m:6,v1:4.75,g:0},{d:"6/2",m:6,v1:8.75,g:0},{d:"6/3",m:6,v1:-1.75,g:0},{d:"6/4",m:6,v1:-5.5,g:0},
-  {d:"6/5",m:6,v1:2.5,g:0},{d:"6/6",m:6,v1:1,g:0},{d:"6/7",m:6,v1:0,g:0},{d:"6/8",m:6,v1:9,g:0},
-  {d:"6/9",m:6,v1:-0.75,g:0},{d:"6/10",m:6,v1:-1.5,g:0},{d:"6/11",m:6,v1:1,g:0},{d:"6/12",m:6,v1:-2,g:0},
-  {d:"6/13",m:6,v1:-4,g:0},{d:"6/14",m:6,v1:1,g:0},{d:"6/15",m:6,v1:4,g:0},{d:"6/16",m:6,v1:13.25,g:0},
-  {d:"6/17",m:6,v1:-2.5,g:0},{d:"6/18",m:6,v1:-2,g:0},{d:"6/19",m:6,v1:5,g:0},{d:"6/20",m:6,v1:8.75,g:0},
-  {d:"6/21",m:6,v1:5.75,g:0},{d:"6/22",m:6,v1:6,g:0},{d:"6/23",m:6,v1:6,g:0},{d:"6/24",m:6,v1:1,g:0},
-  {d:"6/25",m:6,v1:-3.5,g:0},{d:"6/26",m:6,v1:8,g:0},{d:"6/27",m:6,v1:-3,g:0},{d:"6/28",m:6,v1:-4,g:0},
-  {d:"6/29",m:6,v1:-2,g:0},{d:"6/30",m:6,v1:2.75,g:0},
-
-  {d:"7/1",m:7,v1:4,g:2},{d:"7/2",m:7,v1:-2,g:-1},{d:"7/3",m:7,v1:-2,g:3.5},{d:"7/4",m:7,v1:6,g:1.75},
-  {d:"7/5",m:7,v1:2,g:0},{d:"7/6",m:7,v1:5,g:3},{d:"7/7",m:7,v1:2.75,g:1.25},{d:"7/8",m:7,v1:2,g:-1.25},
-  {d:"7/9",m:7,v1:1,g:-1},{d:"7/10",m:7,v1:-4.75,g:0},{d:"7/11",m:7,v1:1,g:-1},{d:"7/12",m:7,v1:0,g:0},
-  {d:"7/13",m:7,v1:1,g:1},{d:"7/14",m:7,v1:2,g:1},{d:"7/15",m:7,v1:-1,g:-1.5},{d:"7/16",m:7,v1:-2,g:-1},
-  {d:"7/17",m:7,v1:-3.5,g:1.5},{d:"7/18",m:7,v1:0,g:0},{d:"7/19",m:7,v1:3.5,g:2.5},{d:"7/20",m:7,v1:-2,g:-1.5},
-  {d:"7/21",m:7,v1:7.75,g:3},{d:"7/22",m:7,v1:5,g:5.5},{d:"7/23",m:7,v1:-2,g:3},{d:"7/24",m:7,v1:4.25,g:-2.5},
-  {d:"7/25",m:7,v1:3,g:-0.5},{d:"7/26",m:7,v1:2,g:1},{d:"7/27",m:7,v1:-2,g:3.25},{d:"7/28",m:7,v1:5,g:5.25},
-  {d:"7/29",m:7,v1:5,g:-1.25},{d:"7/30",m:7,v1:-2,g:0},{d:"7/31",m:7,v1:-2,g:1.5},
-  
-  {d:"8/1",m:8,v1:-1.5,g:-0.5},{d:"8/2",m:8,v1:0,g:0},
+  {d:"5/29",m:5,v1:4.25,g:0},{d:"5/30",m:5,v1:3.75,g:0},{d:"5/31",m:5,v1:1,g:0},{d:"6/1",m:6,v1:4.75,g:0},
+  {d:"6/2",m:6,v1:8.75,g:0},{d:"6/3",m:6,v1:-1.75,g:0},{d:"6/4",m:6,v1:-5.5,g:0},{d:"6/5",m:6,v1:2.5,g:0},
+  {d:"6/6",m:6,v1:1,g:0},{d:"6/7",m:6,v1:0,g:0},{d:"6/8",m:6,v1:9,g:0},{d:"6/9",m:6,v1:-0.75,g:0},
+  {d:"6/10",m:6,v1:-1.5,g:0},{d:"6/11",m:6,v1:1,g:0},{d:"6/12",m:6,v1:-2,g:0},{d:"6/13",m:6,v1:-4,g:0},
+  {d:"6/14",m:6,v1:1,g:0},{d:"6/15",m:6,v1:4,g:0},{d:"6/16",m:6,v1:13.25,g:0},{d:"6/17",m:6,v1:-2.5,g:0},
+  {d:"6/18",m:6,v1:-2,g:0},{d:"6/19",m:6,v1:5,g:0},{d:"6/20",m:6,v1:8.75,g:0},{d:"6/21",m:6,v1:5.75,g:0},
+  {d:"6/22",m:6,v1:6,g:0},{d:"6/23",m:6,v1:6,g:0},{d:"6/24",m:6,v1:1,g:0},{d:"6/25",m:6,v1:-3.5,g:0},
+  {d:"6/26",m:6,v1:8,g:0},{d:"6/27",m:6,v1:-3,g:0},{d:"6/28",m:6,v1:-4,g:0},{d:"6/29",m:6,v1:-2,g:0},
+  {d:"6/30",m:6,v1:2.75,g:0},{d:"7/1",m:7,v1:4,g:2},{d:"7/2",m:7,v1:-2,g:-1},{d:"7/3",m:7,v1:-2,g:3.5},
+  {d:"7/4",m:7,v1:6,g:1.75},{d:"7/5",m:7,v1:2,g:0},{d:"7/6",m:7,v1:5,g:3},{d:"7/7",m:7,v1:2.75,g:1.25},
+  {d:"7/8",m:7,v1:2,g:-1.25},{d:"7/9",m:7,v1:1,g:-1},{d:"7/10",m:7,v1:-4.75,g:0},{d:"7/11",m:7,v1:1,g:-1},
+  {d:"7/12",m:7,v1:0,g:0},{d:"7/13",m:7,v1:1,g:1},{d:"7/14",m:7,v1:2,g:1},{d:"7/15",m:7,v1:-1,g:-1.5},
+  {d:"7/16",m:7,v1:-2,g:-1},{d:"7/17",m:7,v1:-3.5,g:1.5},{d:"7/18",m:7,v1:0,g:0},{d:"7/19",m:7,v1:3.5,g:2.5},
+  {d:"7/20",m:7,v1:-2,g:-1.5},{d:"7/21",m:7,v1:7.75,g:3},{d:"7/22",m:7,v1:5,g:5.5},{d:"7/23",m:7,v1:-2,g:3},
+  {d:"7/24",m:7,v1:4.25,g:-2.5},{d:"7/25",m:7,v1:3,g:-0.5},{d:"7/26",m:7,v1:2,g:1},{d:"7/27",m:7,v1:-2,g:3.25},
+  {d:"7/28",m:7,v1:5,g:5.25},{d:"7/29",m:7,v1:5,g:-1.25},{d:"7/30",m:7,v1:-2,g:0},{d:"7/31",m:7,v1:-2,g:1.5},
+  {d:"8/1",m:8,v1:-1.5,g:-0.5},
 ];
 
 const MONTH_NAMES = {5:"May",6:"June",7:"July",8:"August",9:"September",10:"October",11:"November",12:"December",1:"January",2:"February",3:"March",4:"April"};
@@ -517,6 +529,43 @@ cum.forEach(r => {
   svg.innerHTML = svgHTML;
 })();
 
+/* ---------- Weekly bar chart (7-day buckets from season start) ---------- */
+(function drawWeekly(){
+  const svg = document.getElementById('weeklyChart');
+  const weeks = [];
+  for(let i=0;i<days.length;i+=7){
+    const chunk = days.slice(i, i+7);
+    const total = +chunk.reduce((a,b)=>a+b.total,0).toFixed(2);
+    weeks.push({ label: chunk[0].d, total });
+  }
+
+  const W=860,H=260,padL=54,padR=20,padT=16,padB=30;
+  const maxAbs = Math.max(...weeks.map(w=>Math.abs(w.total)), 5);
+  const zeroY = padT + (H-padT-padB) * (maxAbs/(maxAbs*2));
+  const scale = (H-padT-padB)/(maxAbs*2);
+  const bw = (W-padL-padR)/weeks.length;
+
+  let html = '';
+  [maxAbs, maxAbs/2, 0, -maxAbs/2, -maxAbs].forEach(v=>{
+    const yy = zeroY - v*scale;
+    html += `<line class="gridline" x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}"/>`;
+    html += `<text class="axis-label" x="${padL-10}" y="${yy+3}" text-anchor="end">${v>=0?'+':''}${Math.round(v)}</text>`;
+  });
+
+  const labelEvery = Math.max(1, Math.ceil(weeks.length/10));
+  weeks.forEach((w,i)=>{
+    const cx = padL + bw*i + bw/2;
+    const barW = Math.max(bw*0.5, 4);
+    const h = Math.abs(w.total)*scale;
+    const yTop = w.total>=0 ? zeroY-h : zeroY;
+    html += `<rect class="${w.total>=0?'bar-pos':'bar-neg'}" x="${(cx-barW/2).toFixed(1)}" y="${yTop.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(h,1).toFixed(1)}" rx="2"/>`;
+    if(i%labelEvery===0){
+      html += `<text class="axis-label" x="${cx}" y="${H-10}" text-anchor="middle">${w.label}</text>`;
+    }
+  });
+  svg.innerHTML = html;
+})();
+
 /* ---------- Monthly bar chart ---------- */
 (function drawMonthly(){
   const svg = document.getElementById('monthChart');
@@ -560,6 +609,71 @@ cum.forEach(r => {
     <text x="${cx}" y="${cy+16}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" letter-spacing="2" fill="var(--muted)">WIN RATE</text>
   `;
   svg.innerHTML = html;
+})();
+
+/* ---------- Cappers Recap ---------- */
+(function drawCappers(){
+  const grid = document.getElementById('cappersGrid');
+
+  // Ghost only started 7/1 — build its series from that date forward.
+  const ghostStartIdx = days.findIndex(d => d.d === "7/1");
+  const ghostDays = ghostStartIdx === -1 ? [] : days.slice(ghostStartIdx);
+
+  const cappers = [
+    { key:'v1', name:'V1zons', field:'v1', source: days, accent:'var(--gold-bright)', gradId:'gradV1' },
+    { key:'ghost', name:'Ghost', field:'g', source: ghostDays, accent:'var(--burgundy-bright)', gradId:'gradGhost' },
+  ];
+
+  cappers.forEach(c => {
+    const series = c.source.map(d => ({ d: d.d, val: +d[c.field].toFixed(2) }));
+    let run = 0;
+    const cumSeries = series.map(s => { run = +(run + s.val).toFixed(2); return { d: s.d, cum: run }; });
+    const net = cumSeries.length ? cumSeries[cumSeries.length-1].cum : 0;
+    const w = series.filter(s => s.val > 0).length;
+    const l = series.filter(s => s.val < 0).length;
+    const wr = (w+l) ? Math.round((w/(w+l))*1000)/10 : 0;
+    const best = series.reduce((a,b)=> b.val > a.val ? b : a, series[0] || {val:0,d:''});
+    const worst = series.reduce((a,b)=> b.val < a.val ? b : a, series[0] || {val:0,d:''});
+
+    const card = document.createElement('div');
+    card.className = 'panel';
+    card.innerHTML = `
+      <div class="section-eyebrow">${c.name}</div>
+      <h2 style="font-size:22px;">${net>=0?'+':''}${net.toFixed(1)}u</h2>
+      <p class="desc" style="margin-bottom:16px;">${series.length} days tracked &middot; ${wr}% win rate</p>
+      <div class="chart-wrap"><svg class="chart" viewBox="0 0 400 150" id="chart-${c.key}"></svg></div>
+      <div class="curve-footer" style="margin-top:16px;padding-top:14px;">
+        <div class="item"><div class="k">Best Day</div><div class="v" style="font-size:15px;">+${best.val.toFixed(1)}u &middot; ${best.d}</div></div>
+        <div class="item"><div class="k">Worst Day</div><div class="v" style="font-size:15px;">${worst.val.toFixed(1)}u &middot; ${worst.d}</div></div>
+      </div>
+    `;
+    grid.appendChild(card);
+
+    // mini cumulative chart
+    const svg = document.getElementById(`chart-${c.key}`);
+    if(!cumSeries.length){ svg.innerHTML = ''; return; }
+    const W=400,H=150,padL=10,padR=10,padT=14,padB=10;
+    const minV = Math.min(0, ...cumSeries.map(p=>p.cum));
+    const maxV = Math.max(0, ...cumSeries.map(p=>p.cum));
+    const range = (maxV-minV) || 1;
+    const x = i => padL + (i/(Math.max(cumSeries.length-1,1)))*(W-padL-padR);
+    const y = v => padT + (1-((v-minV)/range))*(H-padT-padB);
+
+    let linePath = '';
+    cumSeries.forEach((p,i)=>{ linePath += (i===0?'M':'L') + x(i).toFixed(1) + ',' + y(p.cum).toFixed(1) + ' '; });
+    const areaPath = `M${x(0)},${y(0)} ` + cumSeries.map((p,i)=>`L${x(i).toFixed(1)},${y(p.cum).toFixed(1)}`).join(' ') + ` L${x(cumSeries.length-1)},${y(0)} Z`;
+
+    svg.innerHTML = `
+      <defs>
+        <linearGradient id="${c.gradId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${c.accent}" stop-opacity="0.30"/>
+          <stop offset="100%" stop-color="${c.accent}" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="${areaPath}" fill="url(#${c.gradId})"/>
+      <path d="${linePath}" fill="none" stroke="${c.accent}" stroke-width="2" style="filter:drop-shadow(0 0 5px ${c.accent}55)"/>
+    `;
+  });
 })();
 </script>
 
