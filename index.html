@@ -204,6 +204,22 @@
     .medallion .sheen{animation:none;}
     .medallion .ring-fill{animation:none;stroke-dasharray:var(--dash) 999;}
   }
+
+  /* ---------- Chart tooltip ---------- */
+  .chart-wrap{position:relative;}
+  .chart-tooltip{
+    position:fixed;pointer-events:none;z-index:200;
+    background:#0f0b18;border:1px solid var(--gold-dim);border-radius:8px;
+    padding:8px 12px;font-family:'IBM Plex Mono',monospace;font-size:12px;
+    color:var(--cream);white-space:nowrap;opacity:0;transform:translate(-50%,-100%) translateY(-10px);
+    transition:opacity .1s ease;box-shadow:0 6px 18px rgba(0,0,0,.5);
+  }
+  .chart-tooltip.show{opacity:1;}
+  .chart-tooltip .tt-date{color:var(--gold-dim);font-size:10px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px;}
+  .chart-tooltip .tt-val{font-size:14px;font-weight:600;}
+  .hover-target{cursor:pointer;}
+  .hover-target:hover{filter:brightness(1.25);}
+  .hover-dot{fill:transparent;stroke:none;pointer-events:all;}
 </style>
 </head>
 <body>
@@ -357,6 +373,28 @@
 </footer>
 
 <script>
+/* ---------- Shared tooltip helper ---------- */
+const tooltipEl = document.createElement('div');
+tooltipEl.className = 'chart-tooltip';
+document.body.appendChild(tooltipEl);
+
+function showTooltip(clientX, clientY, dateStr, valueStr){
+  tooltipEl.innerHTML = `<div class="tt-date">${dateStr}</div><div class="tt-val">${valueStr}</div>`;
+  tooltipEl.style.left = clientX + 'px';
+  tooltipEl.style.top = clientY + 'px';
+  tooltipEl.classList.add('show');
+}
+function moveTooltip(clientX, clientY){
+  tooltipEl.style.left = clientX + 'px';
+  tooltipEl.style.top = clientY + 'px';
+}
+function hideTooltip(){
+  tooltipEl.classList.remove('show');
+}
+function fmtUnits(v){
+  return (v>=0?'+':'') + v.toFixed(2) + 'u';
+}
+
 /* ============ RAW DATA — add new days here ============
    Each entry: { d: "M/D", m: month number, v1: V1zons units, g: Ghost units (0 if not running that day) }
 */
@@ -384,8 +422,7 @@ const RAW = [
   {d:"7/20",m:7,v1:-2,g:-1.5},{d:"7/21",m:7,v1:7.75,g:3},{d:"7/22",m:7,v1:5,g:5.5},{d:"7/23",m:7,v1:-2,g:3},
   {d:"7/24",m:7,v1:4.25,g:-2.5},{d:"7/25",m:7,v1:3,g:-0.5},{d:"7/26",m:7,v1:2,g:1},{d:"7/27",m:7,v1:-2,g:3.25},
   {d:"7/28",m:7,v1:5,g:5.25},{d:"7/29",m:7,v1:5,g:-1.25},{d:"7/30",m:7,v1:-2,g:0},{d:"7/31",m:7,v1:-2,g:1.5},
-  {d:"8/1",m:8,v1:-1.5,g:-0.5},{d:"8/2",m:8,v1:1,g:0},{d:"8/3",m:8,v1:2,g:1.75},{d:"8/4",m:8,v1:2,g:2.25},{d:"8/5",m:8,v1:3,g:-1},
-
+  {d:"8/1",m:8,v1:-1.5,g:-0.5},
 ];
 
 const MONTH_NAMES = {5:"May",6:"June",7:"July",8:"August",9:"September",10:"October",11:"November",12:"December",1:"January",2:"February",3:"March",4:"April"};
@@ -527,7 +564,14 @@ cum.forEach(r => {
     svgHTML += `<text class="marker-text ${m.dy>0?'dim':''}" x="${px}" y="${py+m.dy}" text-anchor="middle">${m.label}</text>`;
   });
 
+  // invisible hover targets, one per day
+  cum.forEach((d,i)=>{
+    const px=x(i), py=y(d.cum);
+    svgHTML += `<circle class="hover-target hover-dot" data-date="${d.d}" data-val="Total: ${fmtUnits(d.cum)}" cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="9"/>`;
+  });
+
   svg.innerHTML = svgHTML;
+  attachBarTooltips(svg);
 })();
 
 /* ---------- Weekly bar chart (7-day buckets from season start) ---------- */
@@ -559,12 +603,13 @@ cum.forEach(r => {
     const barW = Math.max(bw*0.5, 4);
     const h = Math.abs(w.total)*scale;
     const yTop = w.total>=0 ? zeroY-h : zeroY;
-    html += `<rect class="${w.total>=0?'bar-pos':'bar-neg'}" x="${(cx-barW/2).toFixed(1)}" y="${yTop.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(h,1).toFixed(1)}" rx="2"/>`;
+    html += `<rect class="hover-target ${w.total>=0?'bar-pos':'bar-neg'}" data-date="Week of ${w.label}" data-val="${fmtUnits(w.total)}" x="${(cx-barW/2).toFixed(1)}" y="${yTop.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(h,1).toFixed(1)}" rx="2"/>`;
     if(i%labelEvery===0){
       html += `<text class="axis-label" x="${cx}" y="${H-10}" text-anchor="middle">${w.label}</text>`;
     }
   });
   svg.innerHTML = html;
+  attachBarTooltips(svg);
 })();
 
 /* ---------- Monthly bar chart ---------- */
@@ -588,11 +633,28 @@ cum.forEach(r => {
     const barW = bw*0.42;
     const h = Math.abs(m.total)*scale;
     const yTop = m.total>=0 ? zeroY-h : zeroY;
-    html += `<rect class="${m.total>=0?'bar-pos':'bar-neg'}" x="${(cx-barW/2).toFixed(1)}" y="${yTop.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(h,1).toFixed(1)}" rx="2"/>`;
+    html += `<rect class="hover-target ${m.total>=0?'bar-pos':'bar-neg'}" data-date="${m.name}" data-val="${fmtUnits(m.total)}" x="${(cx-barW/2).toFixed(1)}" y="${yTop.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(h,1).toFixed(1)}" rx="2"/>`;
     html += `<text class="axis-label" x="${cx}" y="${H-10}" text-anchor="middle">${m.name.slice(0,3)}</text>`;
   });
   svg.innerHTML = html;
+  attachBarTooltips(svg);
 })();
+
+/* ---------- Shared bar-hover wiring ---------- */
+function attachBarTooltips(svg){
+  svg.querySelectorAll('.hover-target').forEach(bar=>{
+    bar.addEventListener('mousemove', e=>{
+      showTooltip(e.clientX, e.clientY - 12, bar.getAttribute('data-date'), bar.getAttribute('data-val'));
+    });
+    bar.addEventListener('mouseleave', hideTooltip);
+    // touch support
+    bar.addEventListener('touchstart', e=>{
+      const t = e.touches[0];
+      showTooltip(t.clientX, t.clientY - 12, bar.getAttribute('data-date'), bar.getAttribute('data-val'));
+    }, {passive:true});
+  });
+  svg.addEventListener('touchend', hideTooltip);
+}
 
 /* ---------- Donut chart ---------- */
 (function drawDonut(){
@@ -673,7 +735,9 @@ cum.forEach(r => {
       </defs>
       <path d="${areaPath}" fill="url(#${c.gradId})"/>
       <path d="${linePath}" fill="none" stroke="${c.accent}" stroke-width="2" style="filter:drop-shadow(0 0 5px ${c.accent}55)"/>
+      ${cumSeries.map((p,i)=>`<circle class="hover-target hover-dot" data-date="${c.name} · ${p.d}" data-val="Total: ${fmtUnits(p.cum)}" cx="${x(i).toFixed(1)}" cy="${y(p.cum).toFixed(1)}" r="8"/>`).join('')}
     `;
+    attachBarTooltips(svg);
   });
 })();
 </script>
