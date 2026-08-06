@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Responsible Gambling — Power In The Prize</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0812; --panel:#161027; --line:#2c2247;
+    --gold:#d4af6a; --gold-bright:#f0cf8a; --gold-dim:#8a744a;
+    --burgundy:#7a4fc4; --burgundy-bright:#a984e0;
+    --cream:#f1ece0; --muted:#948c9e; --muted-2:#645a78;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:radial-gradient(120% 90% at 50% -10%, #1c1430 0%, var(--bg) 55%);
+    color:var(--cream);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .wrap{max-width:760px;margin:0 auto;padding:0 24px;}
+  header{
+    position:sticky;top:0;z-index:50;background:rgba(10,8,18,.86);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
+  }
+  header .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .mark{
+    width:28px;height:28px;border-radius:50%;border:1px solid var(--gold-dim);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces',serif;font-size:14px;color:var(--gold-bright);
+  }
+  .brand .name{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+  .brand .name b{color:var(--cream);font-weight:600;}
+  .back-link{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--gold-dim);text-decoration:none;border-bottom:1px solid transparent;
+  }
+  .back-link:hover{border-bottom-color:var(--gold-dim);}
+
+  .hero{padding:56px 0 8px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.28em;
+    text-transform:uppercase;color:var(--gold-dim);margin-bottom:14px;
+  }
+  h1{
+    font-family:'Fraunces',serif;font-weight:500;font-size:clamp(30px,5.5vw,44px);
+    line-height:1.08;color:var(--gold-bright);margin-bottom:14px;
+  }
+  .lede{color:var(--muted);font-size:15px;line-height:1.65;max-width:600px;}
+
+  section.block{margin:36px 0;}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px 26px;}
+  h2{font-family:'Fraunces',serif;font-weight:500;font-size:21px;color:var(--cream);margin-bottom:14px;}
+  p{color:var(--muted);font-size:14px;line-height:1.75;margin-bottom:12px;}
+  p:last-child{margin-bottom:0;}
+  ul{margin:8px 0 4px 20px;}
+  li{color:var(--muted);font-size:14px;line-height:1.8;}
+
+  .helpline{
+    background:linear-gradient(165deg,#211a3d 0%, #130e22 60%);border:1px solid #34275a;
+    border-radius:16px;padding:30px 26px;text-align:center;
+  }
+  .helpline .num{
+    font-family:'Fraunces',serif;font-size:34px;color:var(--gold-bright);font-weight:600;margin:10px 0;
+  }
+  .helpline .sub{font-size:13px;color:var(--muted);}
+  .helpline a{color:var(--gold-bright);text-decoration:none;border-bottom:1px solid var(--gold-dim);}
+
+  .signs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;}
+  .sign{
+    background:#0f0b18;border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;font-size:13px;color:var(--cream);
+  }
+
+  footer{padding:40px 0 60px;text-align:center;}
+  footer p{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--muted-2);text-transform:uppercase;}
+
+  @media (max-width:600px){
+    .signs-grid{grid-template-columns:1fr;}
+    .panel{padding:22px 18px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <div class="mark">P</div>
+      <div class="name"><b>Power In The Prize</b></div>
+    </div>
+    <a class="back-link" href="index.html">&larr; Back to Tracker</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Please Read</div>
+    <h1>Responsible Gambling</h1>
+    <p class="lede">Sports betting should be entertainment, not a way to solve money problems. Everything on this site &mdash; every unit tracked, every chart &mdash; is for informational and entertainment purposes only. Nothing here is financial advice, and no result on this site guarantees future performance.</p>
+  </div>
+
+  <section class="block">
+    <div class="helpline">
+      <div class="eyebrow" style="justify-content:center;display:flex;">National Problem Gambling Helpline</div>
+      <div class="num">1-800-GAMBLER</div>
+      <div class="sub">Free, confidential support, available 24/7 &middot; <a href="https://www.ncpgambling.org" target="_blank" rel="noopener">ncpgambling.org</a></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="panel">
+      <h2>Some Ground Rules</h2>
+      <ul>
+        <li>Only bet money you can afford to lose &mdash; never rent, bills, or savings.</li>
+        <li>You must be 21+ (or the legal betting age in your state/country) to wager with a licensed sportsbook.</li>
+        <li>Past results, including everything shown on this tracker, do not guarantee future outcomes. Every system runs cold.</li>
+        <li>Set a budget before you bet, and stop when you hit it &mdash; win or lose.</li>
+        <li>Betting shouldn't be used to chase losses, cope with stress, or fix a financial hole.</li>
+        <li>If gambling stops being fun, that's the signal to step back, not press harder.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="panel">
+      <h2>Signs It Might Be More Than a Hobby</h2>
+      <p>If any of these sound familiar, it's worth talking to someone or reaching out to a helpline &mdash; no judgment, just a resource:</p>
+      <div class="signs-grid">
+        <div class="sign">Betting more than you planned to, more often than you meant to</div>
+        <div class="sign">Chasing losses with bigger bets to "get even"</div>
+        <div class="sign">Lying to people close to you about how much you bet or lost</div>
+        <div class="sign">Borrowing money, missing payments, or dipping into savings to bet</div>
+        <div class="sign">Feeling anxious, irritable, or unable to focus when you're not betting</div>
+        <div class="sign">Betting is affecting work, sleep, relationships, or your mood</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="panel">
+      <h2>Where to Get Help</h2>
+      <p><b style="color:var(--cream);">Call or text 1-800-GAMBLER (1-800-426-2537)</b> &mdash; free and confidential, 24/7.</p>
+      <p><a href="https://www.ncpgambling.org" target="_blank" rel="noopener">National Council on Problem Gambling</a> &mdash; resources, state-by-state helplines, and self-exclusion programs.</p>
+      <p><a href="https://www.gamblersanonymous.org" target="_blank" rel="noopener">Gamblers Anonymous</a> &mdash; peer support meetings, in-person and online.</p>
+      <p>Most sportsbooks also offer built-in deposit limits, cool-off periods, and self-exclusion tools in their account settings &mdash; worth setting up before you ever need them.</p>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <p>Power In The Prize &middot; Bet responsibly &middot; 21+ where applicable</p>
+</footer>
+
+</body>
+</html>
