@@ -220,6 +220,33 @@
   .hover-target{cursor:pointer;}
   .hover-target:hover{filter:brightness(1.25);}
   .hover-dot{fill:transparent;stroke:none;pointer-events:all;}
+
+  /* ---------- Profit calculator ---------- */
+  .calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+  .calc-card{
+    background:#0f0b18;border:1px solid var(--line);border-radius:12px;
+    padding:18px 14px;text-align:center;transition:border-color .15s ease;
+  }
+  .calc-card:hover{border-color:var(--gold-dim);}
+  .calc-card .stake{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+  .calc-card .profit{font-family:'Fraunces',serif;font-size:24px;font-weight:600;}
+  .calc-card .profit.pos{color:var(--gold-bright);}
+  .calc-card .profit.neg{color:var(--burgundy-bright);}
+  .calc-custom{border-top:1px solid var(--line);padding-top:20px;}
+  .calc-custom label{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+  .calc-custom-row{display:flex;align-items:center;gap:10px;background:#0f0b18;border:1px solid var(--line);border-radius:10px;padding:4px 4px 4px 16px;}
+  .calc-dollar{font-family:'IBM Plex Mono',monospace;color:var(--muted);font-size:15px;}
+  .calc-custom-row input{
+    flex:1;background:transparent;border:none;outline:none;color:var(--cream);
+    font-family:'IBM Plex Mono',monospace;font-size:15px;padding:10px 0;
+  }
+  .calc-custom-result{
+    font-family:'Fraunces',serif;font-size:19px;font-weight:600;color:var(--gold-bright);
+    padding:10px 16px;white-space:nowrap;
+  }
+  @media (max-width:640px){
+    .calc-grid{grid-template-columns:repeat(2,1fr);}
+  }
 </style>
 </head>
 <body>
@@ -287,6 +314,23 @@
       <div class="sub" id="statStreakSub">—</div>
     </div>
   </div>
+
+  <section class="block">
+    <div class="panel">
+      <div class="section-eyebrow">What It'd Be Worth</div>
+      <h2>Profit By Unit Size</h2>
+      <p class="desc">See what the season's net units translate to at different stake sizes. Scales linearly &mdash; plug in your own to check anything in between.</p>
+      <div class="calc-grid" id="calcGrid"></div>
+      <div class="calc-custom">
+        <label for="customStake">Custom $ per unit</label>
+        <div class="calc-custom-row">
+          <span class="calc-dollar">$</span>
+          <input type="number" id="customStake" placeholder="e.g. 35" min="0" step="1">
+          <div class="calc-custom-result" id="customResult">—</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <section class="block">
     <div class="panel tinted">
@@ -370,6 +414,7 @@
 
 <footer>
   <p>Power In The Prize &middot; Results tracked for transparency, not a guarantee of future performance</p>
+  <p style="margin-top:10px;"><a href="responsible-gambling.html" style="color:var(--gold-dim);text-decoration:none;border-bottom:1px solid var(--gold-dim);">Responsible Gambling</a></p>
 </footer>
 
 <script>
@@ -484,6 +529,36 @@ document.getElementById('statStreakSub').textContent = `ending ${streakEnd}`;
 document.getElementById('curvePeak').textContent = `+${peak.cum.toFixed(1)}u · ${peak.d}`;
 document.getElementById('curveDD').textContent = `-${maxDD.toFixed(1)}u · ${ddStart.d} \u2192 ${ddEnd.d}`;
 document.getElementById('curveFinish').textContent = `${finish.cum>=0?'+':''}${finish.cum.toFixed(1)}u`;
+
+/* ---------- Profit calculator ---------- */
+(function buildCalc(){
+  const stakes = [10, 25, 50, 100];
+  const grid = document.getElementById('calcGrid');
+  const fmtMoney = n => {
+    const sign = n < 0 ? '-' : '';
+    return sign + '$' + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+  };
+  stakes.forEach(s => {
+    const profit = finish.cum * s;
+    const card = document.createElement('div');
+    card.className = 'calc-card';
+    card.innerHTML = `
+      <div class="stake">$${s} / unit</div>
+      <div class="profit ${profit>=0?'pos':'neg'}">${fmtMoney(profit)}</div>
+    `;
+    grid.appendChild(card);
+  });
+
+  const input = document.getElementById('customStake');
+  const result = document.getElementById('customResult');
+  input.addEventListener('input', () => {
+    const val = parseFloat(input.value);
+    if(isNaN(val) || val < 0){ result.textContent = '—'; return; }
+    const profit = finish.cum * val;
+    result.textContent = fmtMoney(profit);
+    result.style.color = profit >= 0 ? 'var(--gold-bright)' : 'var(--burgundy-bright)';
+  });
+})();
 
 /* ---------- Ledger ---------- */
 const tbody = document.getElementById('ledgerBody');
