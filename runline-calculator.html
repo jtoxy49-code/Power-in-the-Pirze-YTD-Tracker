@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>-1 Run Line Calculator — Power In The Prize</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0812; --panel:#161027; --line:#2c2247;
+    --gold:#d4af6a; --gold-bright:#f0cf8a; --gold-dim:#8a744a;
+    --burgundy:#7a4fc4; --burgundy-bright:#a984e0;
+    --cream:#f1ece0; --muted:#948c9e; --muted-2:#645a78;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:radial-gradient(120% 90% at 50% -10%, #1c1430 0%, var(--bg) 55%);
+    color:var(--cream);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .wrap{max-width:680px;margin:0 auto;padding:0 24px;}
+
+  header{
+    position:sticky;top:0;z-index:50;background:rgba(10,8,18,.86);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
+  }
+  header .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .mark{
+    width:28px;height:28px;border-radius:50%;border:1px solid var(--gold-dim);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces',serif;font-size:14px;color:var(--gold-bright);
+  }
+  .brand .name{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+  .brand .name b{color:var(--cream);font-weight:600;}
+  .back-link{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--gold-dim);text-decoration:none;border-bottom:1px solid transparent;
+  }
+  .back-link:hover{border-bottom-color:var(--gold-dim);}
+
+  .hero{padding:52px 0 6px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.28em;
+    text-transform:uppercase;color:var(--gold-dim);margin-bottom:14px;
+  }
+  h1{
+    font-family:'Fraunces',serif;font-weight:500;font-size:clamp(28px,5.5vw,40px);
+    line-height:1.08;color:var(--gold-bright);margin-bottom:12px;
+  }
+  .lede{color:var(--muted);font-size:14px;line-height:1.6;max-width:560px;}
+
+  section.block{margin:28px 0;}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px 26px;}
+  h2{font-family:'Fraunces',serif;font-weight:500;font-size:19px;color:var(--cream);margin-bottom:4px;}
+  .panel-sub{color:var(--muted);font-size:12.5px;margin-bottom:22px;}
+
+  .field-row{display:flex;gap:12px;margin-bottom:18px;}
+  .field{flex:1;}
+  label{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+  input{
+    width:100%;background:#0f0b18;border:1px solid var(--line);border-radius:8px;
+    padding:11px 12px;color:var(--cream);font-family:'IBM Plex Mono',monospace;font-size:14px;outline:none;
+  }
+  input:focus{border-color:var(--gold-dim);}
+  .hint{font-size:11px;color:var(--muted-2);margin-top:6px;}
+
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px;}
+  .line-card{background:#0f0b18;border:1px solid var(--line);border-radius:12px;padding:18px;}
+  .line-card .title{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:14px;}
+  .outcome-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #201c30;font-size:12.5px;gap:8px;}
+  .outcome-row:last-child{border-bottom:none;}
+  .outcome-row .label{color:var(--muted);}
+  .outcome-row .amt{font-family:'IBM Plex Mono',monospace;white-space:nowrap;}
+  .amt.pos{color:var(--gold-bright);}
+  .amt.neg{color:var(--burgundy-bright);}
+  .amt.push{color:var(--muted);}
+
+  .explainer p{color:var(--muted);font-size:14px;line-height:1.75;margin-bottom:14px;}
+  .explainer p:last-child{margin-bottom:0;}
+  .explainer b{color:var(--cream);}
+  .stat-strip{
+    display:flex;gap:16px;background:#0f0b18;border:1px solid var(--line);border-radius:12px;
+    padding:16px;margin:18px 0;flex-wrap:wrap;
+  }
+  .stat-strip .item{flex:1;min-width:140px;}
+  .stat-strip .item .k{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);}
+  .stat-strip .item .v{font-family:'Fraunces',serif;font-size:20px;color:var(--gold-bright);margin-top:4px;}
+
+  footer{padding:40px 0 60px;text-align:center;}
+  footer p{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--muted-2);text-transform:uppercase;}
+
+  @media (max-width:560px){
+    .field-row{flex-direction:column;gap:14px;}
+    .compare{grid-template-columns:1fr;}
+    .panel{padding:22px 18px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <div class="mark">P</div>
+      <div class="name"><b>Power In The Prize</b></div>
+    </div>
+    <a class="back-link" href="index.html">&larr; Back to Tracker</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Tools</div>
+    <h1>-1 Run Line Calculator</h1>
+    <p class="lede">Recreate a -1 run line by splitting your stake between the moneyline and the -1.5 run line, sized so a 1-run win breaks exactly even.</p>
+  </div>
+
+  <section class="block">
+    <div class="panel">
+      <h2>Build Your Own -1</h2>
+      <div class="panel-sub">No -1 line offered? Split your stake between the moneyline and -1.5 to recreate it &mdash; sized so a 1-run win breaks exactly even.</div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="synStake">Total Amount to Risk ($)</label>
+          <input type="number" id="synStake" placeholder="100" min="0" step="1">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="synML">Moneyline Odds</label>
+          <input type="text" id="synML" placeholder="e.g. -120">
+        </div>
+        <div class="field">
+          <label for="synRL">-1.5 Run Line Odds</label>
+          <input type="text" id="synRL" placeholder="e.g. +145">
+        </div>
+      </div>
+
+      <div id="synResults" style="display:none;">
+        <div class="stat-strip">
+          <div class="item">
+            <div class="k">Created -1 Odds</div>
+            <div class="v" id="synCreatedOdds">—</div>
+          </div>
+          <div class="item">
+            <div class="k">Decimal</div>
+            <div class="v" id="synCreatedDecimal">—</div>
+          </div>
+        </div>
+
+        <div class="compare">
+          <div class="line-card">
+            <div class="title">Stake Split</div>
+            <div id="synSplit"></div>
+          </div>
+          <div class="line-card">
+            <div class="title">Outcome Map</div>
+            <div id="synOutcomes"></div>
+          </div>
+        </div>
+
+        <p class="hint" style="margin-top:16px;">Quick logic: moneyline profit = -1.5 stake, so a 1-run win pays out exactly what the run line leg loses.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block explainer">
+    <div class="panel">
+      <h2>Why -1 Can Be the Smarter Play</h2>
+      <p>The whole difference between these two lines comes down to what happens when the favorite <b>wins by exactly one run</b> &mdash; which, in baseball, happens a lot.</p>
+
+      <div class="stat-strip">
+        <div class="item">
+          <div class="k">One-Run Games</div>
+          <div class="v">~25-28%</div>
+        </div>
+        <div class="item">
+          <div class="k">-1.5 Outcome</div>
+          <div class="v">Loss</div>
+        </div>
+        <div class="item">
+          <div class="k">-1 Outcome</div>
+          <div class="v">Push</div>
+        </div>
+      </div>
+
+      <p>Roughly a quarter to a little over a quarter of MLB games are decided by a single run. If your favorite wins 4-3, a -1.5 bet loses outright &mdash; the run line wasn't covered. A -1 bet on the same game just <b>pushes</b>: you get your stake back, no harm done.</p>
+
+      <p>That protection isn't free &mdash; sportsbooks price -1 with worse odds (more negative, or less positive) than -1.5, since they're giving up the chance to collect on every one-run win. But the calculator above shows you exactly what that trade costs in dollar terms for the specific odds you're looking at, so you can judge whether the insurance is worth the price on any given game.</p>
+
+      <p>Generally, -1 tends to be the sharper side when the price gap between the two lines is small, and when you're betting a team that plays a lot of close, low-scoring games. If the -1 line is priced dramatically worse, the standard -1.5 might still be the better expected-value play &mdash; that's exactly what the breakdown above is for.</p>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <p>Power In The Prize &middot; For planning purposes only</p>
+</footer>
+
+<script>
+function toDecimal(raw){
+  const v = parseFloat(raw);
+  if(isNaN(v)) return null;
+  if(v >= 100) return 1 + (v/100);
+  if(v <= -100) return 1 + (100/Math.abs(v));
+  return null;
+}
+
+function fmtMoney(n){
+  const sign = n < 0 ? '-' : '';
+  return sign + '$' + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function rowHTML(label, amt, isPush){
+  const cls = isPush ? 'push' : (amt >= 0 ? 'pos' : 'neg');
+  const text = isPush ? 'Push \u2014 ' + fmtMoney(0) : fmtMoney(amt);
+  return `<div class="outcome-row"><div class="label">${label}</div><div class="amt ${cls}">${text}</div></div>`;
+}
+
+/* ---------- Synthetic -1 (moneyline + -1.5 split) ---------- */
+function decimalToAmerican(d){
+  if(d >= 2) return '+' + Math.round((d-1)*100);
+  return Math.round(-100/(d-1)).toString();
+}
+
+function synCalc(){
+  const T = parseFloat(document.getElementById('synStake').value);
+  const dml = toDecimal(document.getElementById('synML').value);
+  const drl = toDecimal(document.getElementById('synRL').value);
+
+  const results = document.getElementById('synResults');
+
+  if(!T || T <= 0 || !dml || !drl){
+    results.style.display = 'none';
+    return;
+  }
+  results.style.display = 'block';
+
+  const a = T / dml;           // moneyline stake
+  const b = T - a;             // -1.5 stake
+  const profitBig = a*(dml-1) + b*(drl-1);
+  const decCreated = (T + profitBig) / T;
+  const amCreated = decimalToAmerican(decCreated);
+
+  document.getElementById('synCreatedOdds').textContent = amCreated;
+  document.getElementById('synCreatedDecimal').textContent = decCreated.toFixed(3);
+
+  document.getElementById('synSplit').innerHTML = `
+    <div class="outcome-row"><div class="label">Moneyline stake</div><div class="amt pos">${fmtMoney(a)}</div></div>
+    <div class="outcome-row"><div class="label">-1.5 stake</div><div class="amt pos">${fmtMoney(b)}</div></div>
+    <div class="outcome-row"><div class="label">Potential win (2+ runs)</div><div class="amt pos">${fmtMoney(profitBig)}</div></div>
+  `;
+
+  document.getElementById('synOutcomes').innerHTML =
+    rowHTML('Team loses game', -T, false) +
+    rowHTML('Team wins by exactly 1', 0, true) +
+    rowHTML('Team wins by 2 or more', profitBig, false);
+}
+
+['synStake','synML','synRL'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', synCalc);
+});
+</script>
+
+</body>
+</html>
