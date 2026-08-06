@@ -193,6 +193,18 @@
 
   footer{padding:40px 0 60px;text-align:center;}
   footer p{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--muted-2);text-transform:uppercase;}
+  .footer-links{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:22px;}
+  .footer-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--gold-bright);text-decoration:none;
+    padding:13px 24px;border:1px solid var(--gold-dim);border-radius:10px;
+    background:linear-gradient(165deg,#1c1530 0%, #130e22 100%);
+    transition:border-color .15s ease, transform .15s ease;
+  }
+  .footer-btn:hover{border-color:var(--gold-bright);transform:translateY(-1px);}
+  .footer-btn.secondary{color:var(--muted);border-color:var(--line);}
+  .footer-btn.secondary:hover{border-color:var(--gold-dim);color:var(--gold-dim);}
 
   @media (max-width:720px){
     .stats{grid-template-columns:repeat(2,1fr);}
@@ -414,7 +426,11 @@
 
 <footer>
   <p>Power In The Prize &middot; Results tracked for transparency, not a guarantee of future performance</p>
-  <p style="margin-top:10px;"><a href="responsible-gambling.html" style="color:var(--gold-dim);text-decoration:none;border-bottom:1px solid var(--gold-dim);">Responsible Gambling</a></p>
+  <div class="footer-links">
+    <a class="footer-btn" href="hedge-calculator.html">Hedge Calculator</a>
+    <a class="footer-btn" href="runline-calculator.html">-1 Run Line Calculator</a>
+    <a class="footer-btn secondary" href="responsible-gambling.html">Responsible Gambling</a>
+  </div>
 </footer>
 
 <script>
@@ -467,7 +483,7 @@ const RAW = [
   {d:"7/20",m:7,v1:-2,g:-1.5},{d:"7/21",m:7,v1:7.75,g:3},{d:"7/22",m:7,v1:5,g:5.5},{d:"7/23",m:7,v1:-2,g:3},
   {d:"7/24",m:7,v1:4.25,g:-2.5},{d:"7/25",m:7,v1:3,g:-0.5},{d:"7/26",m:7,v1:2,g:1},{d:"7/27",m:7,v1:-2,g:3.25},
   {d:"7/28",m:7,v1:5,g:5.25},{d:"7/29",m:7,v1:5,g:-1.25},{d:"7/30",m:7,v1:-2,g:0},{d:"7/31",m:7,v1:-2,g:1.5},
-  {d:"8/1",m:8,v1:-1.5,g:-0.5},  {d:"8/2",m:8,v1:1,g:0},  {d:"8/3",m:8,v1:2,g:1.75},  {d:"8/4",m:8,v1:2,g:2.25},  {d:"8/5",m:8,v1:3,g:-1},
+  {d:"8/1",m:8,v1:-1.5,g:-0.5},
 ];
 
 const MONTH_NAMES = {5:"May",6:"June",7:"July",8:"August",9:"September",10:"October",11:"November",12:"December",1:"January",2:"February",3:"March",4:"April"};
