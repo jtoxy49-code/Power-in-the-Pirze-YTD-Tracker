@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hedge Calculator — Power In The Prize</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0812; --panel:#161027; --line:#2c2247;
+    --gold:#d4af6a; --gold-bright:#f0cf8a; --gold-dim:#8a744a;
+    --burgundy:#7a4fc4; --burgundy-bright:#a984e0;
+    --cream:#f1ece0; --muted:#948c9e; --muted-2:#645a78;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:radial-gradient(120% 90% at 50% -10%, #1c1430 0%, var(--bg) 55%);
+    color:var(--cream);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .wrap{max-width:640px;margin:0 auto;padding:0 24px;}
+
+  header{
+    position:sticky;top:0;z-index:50;background:rgba(10,8,18,.86);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
+  }
+  header .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .mark{
+    width:28px;height:28px;border-radius:50%;border:1px solid var(--gold-dim);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces',serif;font-size:14px;color:var(--gold-bright);
+  }
+  .brand .name{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+  .brand .name b{color:var(--cream);font-weight:600;}
+  .back-link{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--gold-dim);text-decoration:none;border-bottom:1px solid transparent;
+  }
+  .back-link:hover{border-bottom-color:var(--gold-dim);}
+
+  .hero{padding:52px 0 6px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.28em;
+    text-transform:uppercase;color:var(--gold-dim);margin-bottom:14px;
+  }
+  h1{
+    font-family:'Fraunces',serif;font-weight:500;font-size:clamp(28px,5.5vw,40px);
+    line-height:1.08;color:var(--gold-bright);margin-bottom:12px;
+  }
+  .lede{color:var(--muted);font-size:14px;line-height:1.6;max-width:520px;}
+
+  section.block{margin:28px 0;}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px 26px;}
+  h2{font-family:'Fraunces',serif;font-weight:500;font-size:19px;color:var(--cream);margin-bottom:4px;}
+  .panel-sub{color:var(--muted);font-size:12.5px;margin-bottom:22px;}
+
+  .odds-toggle{display:flex;gap:8px;margin-bottom:22px;}
+  .odds-toggle button{
+    flex:1;background:#0f0b18;border:1px solid var(--line);color:var(--muted);
+    padding:9px;border-radius:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;
+    letter-spacing:.08em;text-transform:uppercase;cursor:pointer;
+  }
+  .odds-toggle button.active{border-color:var(--gold-dim);color:var(--gold-bright);background:#181228;}
+
+  .field-row{display:flex;gap:12px;margin-bottom:18px;}
+  .field{flex:1;}
+  label{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+  input{
+    width:100%;background:#0f0b18;border:1px solid var(--line);border-radius:8px;
+    padding:11px 12px;color:var(--cream);font-family:'IBM Plex Mono',monospace;font-size:14px;outline:none;
+  }
+  input:focus{border-color:var(--gold-dim);}
+  .hint{font-size:11px;color:var(--muted-2);margin-top:6px;}
+
+  .divider{border-top:1px solid var(--line);margin:22px 0;}
+
+  .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .result-card{
+    background:#0f0b18;border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;
+  }
+  .result-card .k{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+  .result-card .v{font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:var(--gold-bright);}
+  .result-card .v.neg{color:var(--burgundy-bright);}
+
+  .outcome-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #201c30;font-size:13px;}
+  .outcome-row:last-child{border-bottom:none;}
+  .outcome-row .label{color:var(--muted);}
+  .outcome-row .amt{font-family:'IBM Plex Mono',monospace;color:var(--cream);}
+  .outcome-row .amt.pos{color:var(--gold-bright);}
+  .outcome-row .amt.neg{color:var(--burgundy-bright);}
+
+  .warn{font-size:12px;color:var(--muted-2);margin-top:16px;line-height:1.6;}
+
+  footer{padding:40px 0 60px;text-align:center;}
+  footer p{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--muted-2);text-transform:uppercase;}
+
+  @media (max-width:520px){
+    .field-row{flex-direction:column;gap:14px;}
+    .result-grid{grid-template-columns:1fr;}
+    .panel{padding:22px 18px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <div class="mark">P</div>
+      <div class="name"><b>Power In The Prize</b></div>
+    </div>
+    <a class="back-link" href="index.html">&larr; Back to Tracker</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Tools</div>
+    <h1>Hedge Calculator</h1>
+    <p class="lede">Figure out how much to bet on the other side to lock in a guaranteed profit &mdash; or just see what happens to your payout if you bet a specific amount.</p>
+  </div>
+
+  <section class="block">
+    <div class="panel">
+      <h2>Your Bets</h2>
+      <div class="panel-sub">Odds format applies to both legs</div>
+
+      <div class="odds-toggle">
+        <button id="btnAmerican" class="active" onclick="setFormat('american')">American (-110)</button>
+        <button id="btnDecimal" onclick="setFormat('decimal')">Decimal (1.91)</button>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="stake1">Original Stake ($)</label>
+          <input type="number" id="stake1" placeholder="100" min="0" step="1">
+        </div>
+        <div class="field">
+          <label for="odds1">Original Odds</label>
+          <input type="text" id="odds1" placeholder="-150">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="odds2">Hedge Odds (other side)</label>
+          <input type="text" id="odds2" placeholder="+130">
+        </div>
+        <div class="field">
+          <label for="stake2">Hedge Stake ($) &mdash; optional</label>
+          <input type="number" id="stake2" placeholder="Leave blank for optimal" min="0" step="1">
+          <div class="hint">Blank = calculate the exact hedge to equalize profit</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="panel">
+      <h2>Result</h2>
+      <div class="panel-sub" id="resultSub">Fill in your bets above</div>
+
+      <div class="result-grid" id="resultGrid" style="display:none;">
+        <div class="result-card">
+          <div class="k">Hedge Stake</div>
+          <div class="v" id="outHedgeStake">—</div>
+        </div>
+        <div class="result-card">
+          <div class="k">Guaranteed Profit</div>
+          <div class="v" id="outGuaranteed">—</div>
+        </div>
+      </div>
+
+      <div class="divider" id="outcomeDivider" style="display:none;"></div>
+
+      <div id="outcomeBreakdown"></div>
+
+      <p class="warn">This assumes the hedge is placed on a genuinely opposing outcome (moneyline other side, opposite total, etc.) at a different book or market. Always double check the actual bet slip before placing &mdash; this is a planning tool, not a guarantee.</p>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <p>Power In The Prize &middot; For planning purposes only</p>
+</footer>
+
+<script>
+let format = 'american';
+
+function setFormat(f){
+  format = f;
+  document.getElementById('btnAmerican').classList.toggle('active', f==='american');
+  document.getElementById('btnDecimal').classList.toggle('active', f==='decimal');
+  document.getElementById('odds1').placeholder = f==='american' ? '-150' : '1.67';
+  document.getElementById('odds2').placeholder = f==='american' ? '+130' : '2.30';
+  calc();
+}
+
+function toDecimal(raw){
+  const v = parseFloat(raw);
+  if(isNaN(v)) return null;
+  if(format === 'decimal'){
+    return v > 1 ? v : null;
+  }
+  // american
+  if(v >= 100) return 1 + (v/100);
+  if(v <= -100) return 1 + (100/Math.abs(v));
+  return null;
+}
+
+function fmtMoney(n){
+  const sign = n < 0 ? '-' : '';
+  return sign + '$' + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function calc(){
+  const stake1 = parseFloat(document.getElementById('stake1').value);
+  const d1 = toDecimal(document.getElementById('odds1').value);
+  const d2 = toDecimal(document.getElementById('odds2').value);
+  const manualStake2 = document.getElementById('stake2').value.trim();
+
+  const resultGrid = document.getElementById('resultGrid');
+  const resultSub = document.getElementById('resultSub');
+  const outcomeDivider = document.getElementById('outcomeDivider');
+  const breakdown = document.getElementById('outcomeBreakdown');
+
+  if(!stake1 || stake1 <= 0 || !d1 || !d2){
+    resultGrid.style.display = 'none';
+    outcomeDivider.style.display = 'none';
+    breakdown.innerHTML = '';
+    resultSub.textContent = 'Fill in your original stake and both odds to see the breakdown';
+    return;
+  }
+
+  // Optimal hedge stake for equal profit both ways
+  const optimalHedge = (stake1 * d1) / d2;
+  const hedgeStake = manualStake2 !== '' && !isNaN(parseFloat(manualStake2)) ? parseFloat(manualStake2) : optimalHedge;
+
+  const profitIfOriginalWins = (stake1 * d1) - stake1 - hedgeStake;
+  const profitIfHedgeWins = (hedgeStake * d2) - hedgeStake - stake1;
+
+  resultGrid.style.display = 'grid';
+  outcomeDivider.style.display = 'block';
+  resultSub.textContent = manualStake2 !== '' ? 'Based on your custom hedge amount' : 'Optimal hedge \u2014 equal profit no matter which side hits';
+
+  document.getElementById('outHedgeStake').textContent = fmtMoney(hedgeStake);
+
+  const guaranteedEl = document.getElementById('outGuaranteed');
+  if(manualStake2 !== ''){
+    const worst = Math.min(profitIfOriginalWins, profitIfHedgeWins);
+    guaranteedEl.textContent = fmtMoney(worst);
+    guaranteedEl.className = 'v ' + (worst < 0 ? 'neg' : '');
+  } else {
+    guaranteedEl.textContent = fmtMoney(profitIfOriginalWins);
+    guaranteedEl.className = 'v ' + (profitIfOriginalWins < 0 ? 'neg' : '');
+  }
+
+  breakdown.innerHTML = `
+    <div class="outcome-row">
+      <div class="label">If original bet wins</div>
+      <div class="amt ${profitIfOriginalWins>=0?'pos':'neg'}">${fmtMoney(profitIfOriginalWins)}</div>
+    </div>
+    <div class="outcome-row">
+      <div class="label">If hedge bet wins</div>
+      <div class="amt ${profitIfHedgeWins>=0?'pos':'neg'}">${fmtMoney(profitIfHedgeWins)}</div>
+    </div>
+  `;
+}
+
+['stake1','odds1','odds2','stake2'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', calc);
+});
+</script>
+
+</body>
+</html>
