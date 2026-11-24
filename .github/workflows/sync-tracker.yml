@@ -32,8 +32,6 @@ jobs:
       contents: read
       id-token: write
       pages: read
-    env:
-      PWR_SITE_DIR: ${{ runner.temp }}/pwr-tracker-pages
     steps:
       - uses: actions/checkout@v6
         with:
@@ -46,6 +44,8 @@ jobs:
       - name: Prepare static site and verify the previous public feed
         shell: bash
         run: |
+          PWR_SITE_DIR="$RUNNER_TEMP/pwr-tracker-pages"
+          printf '%s\n' "PWR_SITE_DIR=$PWR_SITE_DIR" >> "$GITHUB_ENV"
           mkdir -p "$PWR_SITE_DIR"
           cp -- CNAME favicon.png hedge-calculator.html index.html logo-192.png \
             responsible-gambling.html runline-calculator.html tracker.css dashboard.css tracker.js tracker-data.js "$PWR_SITE_DIR/"
