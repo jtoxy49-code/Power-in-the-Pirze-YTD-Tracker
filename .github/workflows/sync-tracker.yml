@@ -1,0 +1,119 @@
+name: Refresh PWR Tracker from Sheets
+run-name: PWR Tracker Sheets ${{ inputs.mode || 'scheduled refresh' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Validate the private Sheet connection or publish the update
+        type: choice
+        options:
+          - validate
+          - publish
+        default: validate
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+
+permissions: {}
+
+concurrency:
+  group: pwr-tracker-pages
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (vars.PWR_TRACKER_SYNC_ENABLED == 'true' ||
+      (github.event_name == 'workflow_dispatch' && inputs.mode == 'validate'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+      id-token: write
+      pages: read
+    env:
+      PWR_SITE_DIR: ${{ runner.temp }}/pwr-tracker-pages
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Prepare static site and verify the previous public feed
+        shell: bash
+        run: |
+          mkdir -p "$PWR_SITE_DIR"
+          cp -- CNAME favicon.png hedge-calculator.html index.html logo-192.png \
+            responsible-gambling.html runline-calculator.html tracker.css dashboard.css tracker.js tracker-data.js "$PWR_SITE_DIR/"
+          cp -R -- assets "$PWR_SITE_DIR/"
+          node --check "$PWR_SITE_DIR/tracker.js"
+          node --check sync-sheet.mjs
+
+          site='https://powerintheprize-ytd-tracker.com'
+          previous="$RUNNER_TEMP/pwr-previous-feed.js"
+          status=$(curl --silent --show-error --location --proto-redir '=https' --compressed --max-time 20 \
+            --output "$previous" --write-out '%{http_code}' "$site/tracker-data.js")
+          case "$status" in
+            200) cp -- "$previous" "$PWR_SITE_DIR/tracker-data.js" ;;
+            404)
+              legacy="$RUNNER_TEMP/pwr-legacy-index.html"
+              curl --fail --silent --show-error --location --proto-redir '=https' --compressed --max-time 20 --output "$legacy" "$site/"
+              if ! grep -F -- 'const RAW = [' "$legacy" >/dev/null; then
+                echo 'The running Tracker is missing its feed. The last published site was retained.'
+                exit 1
+              fi
+              ;;
+            *)
+              echo "Previous feed returned HTTP $status. The last published site was retained."
+              exit 1
+              ;;
+          esac
+          node --check "$PWR_SITE_DIR/tracker-data.js"
+
+      - name: Obtain a short-lived read-only Sheets token
+        id: google
+        uses: google-github-actions/auth@v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.PWR_GOOGLE_PROVIDER }}
+          service_account: ${{ vars.PWR_GOOGLE_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/spreadsheets.readonly
+          create_credentials_file: false
+          export_environment_variables: false
+
+      - name: Validate Sheet data and generate the public feed
+        shell: bash
+        env:
+          PWR_TRACKER_SHEET_ID: ${{ secrets.PWR_TRACKER_SHEET_ID }}
+          PWR_GOOGLE_SHEETS_ACCESS_TOKEN: ${{ steps.google.outputs.access_token }}
+          PWR_TRACKER_STATUS_FROM: ${{ vars.PWR_TRACKER_STATUS_FROM }}
+        run: |
+          node sync-sheet.mjs --explicit-from "$PWR_TRACKER_STATUS_FROM" \
+            --output "$PWR_SITE_DIR/tracker-data.js" --write --accept-corrections
+          node --check "$PWR_SITE_DIR/tracker-data.js"
+
+      - uses: actions/configure-pages@v5
+        if: github.event_name == 'schedule' || inputs.mode == 'publish'
+      - uses: actions/upload-pages-artifact@v4
+        if: github.event_name == 'schedule' || inputs.mode == 'publish'
+        with:
+          path: ${{ env.PWR_SITE_DIR }}
+
+  publish:
+    needs: prepare
+    if: github.event_name == 'schedule' || inputs.mode == 'publish'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: pages
